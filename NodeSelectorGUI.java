@@ -1,12 +1,22 @@
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame; 
+import javax.swing.JPanel;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import java.awt.Container;
+import java.awt.Component;
+import java.awt.GridBagLayout;
+import java.awt.GridBagConstraints;
+import java.awt.Font;
+import java.awt.Dimension;
+import java.awt.Color;
+import java.awt.Insets; 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 public class NodeSelectorGUI {
 
-    public String curSelected = "";
-    public String prevSelected = "";
+    private String curSelected = "";
+    private NodeButton prevSelected;
     JLabel nodeTextLabel; 
 
     public class SetSelectedNodeAction implements ActionListener {
@@ -21,9 +31,12 @@ public class NodeSelectorGUI {
 
         @Override
         public void actionPerformed(ActionEvent e) {
+            if (prevSelected != null) 
+                this.gui.getPrevSelected().setBackground(new Color(10, 169, 209)); // BLUE
             this.gui.setCurSelected(this.button.getName());
-            this.button.setBackground(new Color(0, 255, 0));
+            this.button.setBackground(new Color(0, 255, 0)); // GREEN
             this.gui.getNodeTextLabel().setText(this.gui.curSelected);
+            this.gui.setPrevSelected(this.button);
         }
     }
 
@@ -35,28 +48,33 @@ public class NodeSelectorGUI {
         private ActionListener nodeActionListener;
         private NodeSelectorGUI gui;
 
-        public NodeButton(NodeSelectorGUI gui, boolean isCube, int row, int height) {
+        public NodeButton(NodeSelectorGUI gui, boolean isCube, boolean isHybrid, int row, int col) {
             this.isCube = isCube;
             this.name = "";
             this.gui = gui;
 
-            if (height == 1)
-                this.name += "H";
-            else if (height == 2)
+            if (col == 1)
+                this.name += "L";
+            else if (col == 2)
                 this.name += "M";
             else
-                this.name += "L";
+                this.name += "H";
 
             this.name += String.format("%s", row);
 
             this.setText(this.name);
 
-            if (this.isCube) {
-                this.setBackground(new Color(213, 38, 202));
-                this.setForeground(new Color(255, 255, 255));
-            } else {
-                this.setBackground(new Color(255, 230, 0));
-                this.setForeground(new Color(0, 0, 0));
+            if (isHybrid) { 
+                this.setBackground(new Color(105, 105, 105)); // GREY
+                this.setForeground(new Color(255, 255, 255)); // WHITE
+            }
+            else if (this.isCube) {
+                this.setBackground(new Color(213, 38, 202)); // PURPLE
+                this.setForeground(new Color(255, 255, 255)); // WHITE
+            }
+            else {
+                this.setBackground(new Color(255, 230, 0)); // YELLOW 
+                this.setForeground(new Color(0, 0, 0)); // BLACK
             }
 
             this.nodeActionListener = new SetSelectedNodeAction(this.gui, this);
@@ -86,11 +104,14 @@ public class NodeSelectorGUI {
         for (int y = 1; y <= 3; y++) {
             int tpady = 10;
             int bpady = 10;
-            if (y == 1)
+            boolean isHybrid = false; 
+            if (y == 1) { 
                 tpady = 0;
+                isHybrid = true; 
+            }
             if (y == 3)
                 bpady = 0;
-            NodeButton button = gui.new NodeButton(gui, isCube, rowNum, y);
+            NodeButton button = gui.new NodeButton(gui, isCube, isHybrid, rowNum, y);
             button.setPreferredSize(new Dimension(100, 150));
             addComponent(panel, button, 200 * rowNum, 300 * y, 200, 300, lpadx, tpady, rpadx, bpady,
                     GridBagConstraints.CENTER, 0);
@@ -110,8 +131,20 @@ public class NodeSelectorGUI {
         this.curSelected = node;
     }
 
+    public void setPrevSelected(NodeButton prevNode) { 
+        this.prevSelected = prevNode; 
+    }
+
     public JLabel getNodeTextLabel() { 
         return this.nodeTextLabel; 
+    }
+
+    public String getCurSelected() { 
+        return this.curSelected; 
+    }
+
+    public NodeButton getPrevSelected() { 
+        return this.prevSelected; 
     }
 
     public NodeSelectorGUI() {
@@ -141,18 +174,6 @@ public class NodeSelectorGUI {
     public static void main(String[] args) {
 
         NodeSelectorGUI gui = new NodeSelectorGUI();
-        // Thread printThread = new Thread() {
-        // @Override
-        // public void run() {
-        // while (true) {
-        // //if (!gui.curSelected.equals(gui.prevSelected)) {
-        // System.out.println(String.format("Selected Node: %s", gui.curSelected));
-        // gui.prevSelected = gui.curSelected;
-        // //}
-        // //System.out.println("Thread running!");
-        // }
-        // }
-        // };
-        // printThread.start();
+
     }
 }
